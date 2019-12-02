@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'navigation.dart';
 
-void main() => runApp(QuoteApp());
+// void main() => runApp(QuoteApp());
+void main() => runApp(Navigation());
 
 class QuoteApp extends StatelessWidget {
   @override
