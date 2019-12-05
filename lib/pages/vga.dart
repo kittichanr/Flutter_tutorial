@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'vga-detail.dart';
 import 'package:flutter_cache_store/flutter_cache_store.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter_tutorial_1/models/vga.dart';
+import 'package:flutter_tutorial_1/pages/vga-detail.dart';
 
 class VgaPage extends StatefulWidget {
   @override
@@ -16,6 +15,8 @@ class VgaPage extends StatefulWidget {
 
 class _VgaPageState extends State<VgaPage> {
   List<Vga> vgas = [];
+
+  String sortBy = 'latest'; //latest low2high high2low
 
   @override
   void initState() {
@@ -27,7 +28,6 @@ class _VgaPageState extends State<VgaPage> {
     final store = await CacheStore.getInstance();
     File file = await store.getFile('https://www.advice.co.th/pc/get_comp/vga');
     final jsonString = json.decode(file.readAsStringSync());
-
     setState(() {
       jsonString.forEach((v) {
         final vga = Vga.fromJson(v);
@@ -38,55 +38,83 @@ class _VgaPageState extends State<VgaPage> {
     });
   }
 
+  sortAction() {
+    setState(() {
+      if (sortBy == 'latest') {
+        sortBy = 'low2high';
+        vgas.sort((a, b) {
+          return a.vgaPriceAdv - b.vgaPriceAdv;
+        });
+      } else if (sortBy == 'low2high') {
+        sortBy = 'high2low';
+        vgas.sort((a, b) {
+          return b.vgaPriceAdv - a.vgaPriceAdv;
+        });
+      } else {
+        sortBy = 'latest';
+        vgas.sort((a, b) {
+          return b.id - a.id;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Homepage'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.sort),
+            tooltip: 'Restitch it',
+            onPressed: () => sortAction(),
+          ),
+        ],
       ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: vgas.length,
-          itemBuilder: (context, i) {
-            var v = vgas[vgas.length - i - 1];
-            return Card(
-                elevation: 0,
-                child: Container(
-                  child: InkWell(
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => VgaDetailPage(v),
-                        )),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          height: 100,
-                          width: 100,
-                          child: CachedNetworkImage(
-                            imageUrl:
-                                'https://www.advice.co.th/pic-pc/vga/${v.vgaPicture}',
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text('${v.vgaBrand} ${v.vgaModel}'),
-                                Text('${v.vgaPriceAdv}'),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+      body: ListView.builder(
+        itemCount: vgas.length,
+        itemBuilder: (context, i) {
+          var v = vgas[i];
+          return Card(
+            elevation: 0,
+            child: Container(
+              child: InkWell(
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VgaDetailPage(v),
+                    )),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      height: 100,
+                      width: 100,
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            'https://www.advice.co.th/pic-pc/vga/${v.vgaPicture}',
+                      ),
                     ),
-                  ),
-                ));
-          },
-        ),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text('${v.vgaBrand}'),
+                            Text('${v.vgaModel}'),
+                            Text('${v.vgaPriceAdv} บาท'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

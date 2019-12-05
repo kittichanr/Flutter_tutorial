@@ -11,6 +11,7 @@ class VgaDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('DetailPage'),
+        
       ),
       body: Container(
           child: Column(
