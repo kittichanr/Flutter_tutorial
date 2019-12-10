@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter_tutorial_1/models/vga.dart';
 import 'package:flutter_tutorial_1/pages/vga-detail.dart';
+import 'package:flutter_tutorial_1/pages/vga_filter.dart';
 
 class VgaPage extends StatefulWidget {
   @override
@@ -19,6 +20,8 @@ class _VgaPageState extends State<VgaPage> {
   String sortBy = 'Sort by latest'; //latest low2high high2low
 
   BuildContext _scaffoldContext;
+
+  VgaFilter vgaFilter = VgaFilter();
 
   @override
   void initState() {
@@ -75,6 +78,12 @@ class _VgaPageState extends State<VgaPage> {
           title: Text('Homepage'),
           actions: <Widget>[
             IconButton(
+                icon: Icon(Icons.tune),
+                tooltip: 'Restitch it',
+                onPressed: () {
+                  navigate2filterPage(context);
+                }),
+            IconButton(
               icon: Icon(Icons.sort),
               tooltip: 'Restitch it',
               onPressed: () {
@@ -88,6 +97,19 @@ class _VgaPageState extends State<VgaPage> {
           _scaffoldContext = context;
           return bodyBuilder();
         }));
+  }
+
+  navigate2filterPage(BuildContext context) async {
+    vgaFilter.vgaBrands = ['ASUS'];
+    VgaFilter result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VgaFilterPage(
+            vgaFilter: vgaFilter,
+          ),
+        ));
+    print('out');
+    print(result.vgaBrands);
   }
 
   Widget bodyBuilder() {
