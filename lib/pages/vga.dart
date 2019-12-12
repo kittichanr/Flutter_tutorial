@@ -15,7 +15,8 @@ class VgaPage extends StatefulWidget {
 }
 
 class _VgaPageState extends State<VgaPage> {
-  List<Vga> vgas = [];
+  List<Vga> allVgas = [];
+  List<Vga> filteredVgas = [];
 
   String sortBy = 'Sort by latest'; //latest low2high high2low
 
@@ -27,6 +28,7 @@ class _VgaPageState extends State<VgaPage> {
   void initState() {
     super.initState();
     loadData();
+    filterAction();
   }
 
   loadData() async {
@@ -37,8 +39,20 @@ class _VgaPageState extends State<VgaPage> {
       jsonString.forEach((v) {
         final vga = Vga.fromJson(v);
         if (vga.advId != '') {
-          vgas.add(vga);
+          allVgas.add(vga);
         }
+      });
+    });
+  }
+
+  filterAction() {
+    setState(() {
+      vgaFilter.allBrands = allVgas.map((v) => v.vgaBrand).toSet();
+      vgaFilter.selectedBrands = allVgas.map((v) => v.vgaBrand).toSet();
+      vgaFilter.selectedBrands.remove('GIGABYTE');
+      filteredVgas.clear();
+      allVgas.forEach((v) {
+        if (vgaFilter.selectedBrands.contains(v.vgaBrand)) filteredVgas.add(v);
       });
     });
   }
@@ -47,17 +61,17 @@ class _VgaPageState extends State<VgaPage> {
     setState(() {
       if (sortBy == 'latest') {
         sortBy = 'low2high';
-        vgas.sort((a, b) {
+        filteredVgas.sort((a, b) {
           return a.vgaPriceAdv - b.vgaPriceAdv;
         });
       } else if (sortBy == 'low2high') {
         sortBy = 'high2low';
-        vgas.sort((a, b) {
+        filteredVgas.sort((a, b) {
           return b.vgaPriceAdv - a.vgaPriceAdv;
         });
       } else {
         sortBy = 'latest';
-        vgas.sort((a, b) {
+        filteredVgas.sort((a, b) {
           return b.id - a.id;
         });
       }
@@ -78,14 +92,20 @@ class _VgaPageState extends State<VgaPage> {
           title: Text('Homepage'),
           actions: <Widget>[
             IconButton(
+                icon: Icon(Icons.refresh),
+                tooltip: 'temporary filter action',
+                onPressed: () {
+                  filterAction();
+                }),
+            IconButton(
                 icon: Icon(Icons.tune),
-                tooltip: 'Restitch it',
+                tooltip: 'Filter',
                 onPressed: () {
                   navigate2filterPage(context);
                 }),
             IconButton(
               icon: Icon(Icons.sort),
-              tooltip: 'Restitch it',
+              tooltip: 'Sort',
               onPressed: () {
                 sortAction();
                 showMessage(sortBy);
@@ -100,7 +120,7 @@ class _VgaPageState extends State<VgaPage> {
   }
 
   navigate2filterPage(BuildContext context) async {
-    vgaFilter.vgaBrands = ['ASUS'];
+    // vgaFilter.vgaBrands = ['ASUS'];
     VgaFilter result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -108,15 +128,15 @@ class _VgaPageState extends State<VgaPage> {
             vgaFilter: vgaFilter,
           ),
         ));
-    print('out');
-    print(result.vgaBrands);
+    // print('out');
+    // print(result.vgaBrands);
   }
 
   Widget bodyBuilder() {
     return ListView.builder(
-      itemCount: vgas.length,
+      itemCount: filteredVgas.length,
       itemBuilder: (context, i) {
-        var v = vgas[i];
+        var v = filteredVgas[i];
         return Card(
           elevation: 0,
           child: Container(
