@@ -28,7 +28,6 @@ class _VgaPageState extends State<VgaPage> {
   void initState() {
     super.initState();
     loadData();
-    filterAction();
   }
 
   loadData() async {
@@ -42,14 +41,17 @@ class _VgaPageState extends State<VgaPage> {
           allVgas.add(vga);
         }
       });
+      vgaFilter.allBrands = allVgas.map((v) => v.vgaBrand).toSet();
+      vgaFilter.selectedBrands = allVgas.map((v) => v.vgaBrand).toSet();
     });
+    filterAction();
   }
 
   filterAction() {
     setState(() {
-      vgaFilter.allBrands = allVgas.map((v) => v.vgaBrand).toSet();
-      vgaFilter.selectedBrands = allVgas.map((v) => v.vgaBrand).toSet();
-      vgaFilter.selectedBrands.remove('GIGABYTE');
+      //   vgaFilter.allBrands = allVgas.map((v) => v.vgaBrand).toSet();
+      //   vgaFilter.selectedBrands = allVgas.map((v) => v.vgaBrand).toSet();
+      // vgaFilter.selectedBrands.remove('GIGABYTE');
       filteredVgas.clear();
       allVgas.forEach((v) {
         if (vgaFilter.selectedBrands.contains(v.vgaBrand)) filteredVgas.add(v);
@@ -128,8 +130,12 @@ class _VgaPageState extends State<VgaPage> {
             vgaFilter: vgaFilter,
           ),
         ));
-    // print('out');
-    // print(result.vgaBrands);
+    if (result != null) {
+      setState(() {
+        vgaFilter.selectedBrands = result.selectedBrands;
+      });
+      filterAction();
+    }
   }
 
   Widget bodyBuilder() {
